@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: laravel_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./backend:/var/www
+    ports:
+      - "8000:8000"
+    networks:
+      - app-network
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["sh", "-c", "composer install && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000"]
+    
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: react_app
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    depends_on:
+      - backend
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    command: ["npm", "start"]
+
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ecommerce_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "8081:80"
+    networks:
+      - app-network
+    depends_on:
+      - db
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  dbdata:
