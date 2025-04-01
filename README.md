@@ -112,6 +112,3 @@ O arquivo orquestra os seguintes serviços:
 ## Considerações Finais
 
 Este projeto demonstra boas práticas de desenvolvimento e separação de responsabilidades, além de uma infraestrutura simplificada e escalável utilizando Docker. A containerização facilita a configuração do ambiente de desenvolvimento e pode ser facilmente adaptada para produção.
-
-Explore, teste e contribua para evoluir o catálogo de e-commerce!
-
